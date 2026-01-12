@@ -35,7 +35,11 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     //por lo que he entendido lo puedo crear asi:
-    role : [rolSchema]
+    // role : [rolSchema]
+    role: {
+        type: [rolSchema],
+        default: () => [{ name: 'standard' }]
+    }
 },{
     collection: 'users',
     versionKey: false,
