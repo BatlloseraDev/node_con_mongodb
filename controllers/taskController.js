@@ -1,6 +1,6 @@
 // Hacerlo en el HU que corresponde
-import Task from "../models/TaskMongo";
-import User from "../models/UserMongo";
+import Task from "../models/TaskMongo.js";
+import User from "../models/UserMongo.js";
 
 
 
