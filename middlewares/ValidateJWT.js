@@ -17,7 +17,7 @@ export const validateJWT = (req, res, next) =>{
         const {id, roles} = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
         req.id = id;
         req.roles = roles;
-        console.log(kleur.blue(`ID ${id} con roles ${roles}`));
+        console.log(kleur.blue(`ID ${id} con roles "${roles.map(r => r.name).join(', ')}" ha sido verificado`));
         next();
     }catch(error){
         console.log(error);

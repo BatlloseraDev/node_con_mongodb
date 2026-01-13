@@ -30,6 +30,18 @@ const controlador = {
     },
     getUser: async (req, res) => {
         try {
+
+            const haveRolAdmin = req.roles.some(rol => rol.name === 'admin');
+
+            //verificador de permiso
+            if (!haveRolAdmin && req.id != req.params.id) {
+                console.log(kleur.red().bold('☠️ No tienes permisos para acceder a otro usuario que no eres tu'));
+                res.status(200).json({ 'msg': 'No tienes permisos para acceder a otro usuario que no eres tu' })
+                return;
+            }
+
+
+
             const user = await User.find({ id: req.params.id });
             if (user.length > 0) {
                 console.log(user);
@@ -46,6 +58,16 @@ const controlador = {
     },//get user by id 
     updateUser: async (req, res) => {
         const { userName, email, password } = req.body;
+
+
+        const haveRolAdmin = req.roles.some(rol => rol.name === 'admin');
+
+        //verificador de permiso
+        if (!haveRolAdmin && req.id != req.params.id) {
+            console.log(kleur.red().bold('☠️ No tienes permisos para acceder a otro usuario que no eres tu'));
+            res.status(200).json({ 'msg': 'No tienes permisos para acceder a otro usuario que no eres tu' })
+        }
+
         //encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
         try {
@@ -85,7 +107,7 @@ const controlador = {
         const { id, userName, email, password } = req.body;
         //encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         try {
             const newUser = new User({ id, userName, email, password: hashedPassword });
             await newUser.save();
@@ -104,7 +126,7 @@ const controlador = {
                 console.log(kleur.green().bold('🟢 Usuario logueado correctamente'));
                 console.log(kleur.blue().bold('🔵 GENERANDO JWT'));
                 const token = generateJWT_with_roles(user.id, user.role);
-                res.status(200).json({user, token});
+                res.status(200).json({ user, token });
             } else {
                 console.log(kleur.red().bold('🔴 No se ha podido logear el usuario'));
                 res.status(200).json({ 'msg': 'No se ha podido logear el usuario' })
