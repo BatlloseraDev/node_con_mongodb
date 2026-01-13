@@ -3,6 +3,7 @@
 import User from "../models/UserMongo.js";
 import kleur from "kleur";
 import bcrypt from 'bcrypt';
+import { generateJWT_with_roles } from "../helpers/generate_jwt.js";
 
 
 
@@ -47,11 +48,10 @@ const controlador = {
         const { userName, email, password } = req.body;
         //encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        req.body.password = hashedPassword;
         try {
             const updatedUser = await User.findOneAndUpdate(
                 { id: req.params.id },
-                { userName, email, password },
+                { userName, email, password: hashedPassword },
                 { new: true }//esto devuelve el usuario actualizado
             );
             if (updatedUser) {
@@ -85,9 +85,9 @@ const controlador = {
         const { id, userName, email, password } = req.body;
         //encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        req.body.password = hashedPassword;
+        
         try {
-            const newUser = new User({ id, userName, email, password });
+            const newUser = new User({ id, userName, email, password: hashedPassword });
             await newUser.save();
             console.log(kleur.green().bold('🟢 Usuario registrado correctamente'))
             res.status(200).json(newUser);
@@ -98,14 +98,13 @@ const controlador = {
     },
     login: async (req, res) => {
         const { email, password } = req.body;
-        //TODO
-        const hashedPassword = await bcrypt.hash(password, 10);
-        req.body.password = hashedPassword;
         try {
-            const user = await User.findOne({ email, password });
-            if (user) {
+            const user = await User.findOne({ email });
+            if (user && await bcrypt.compare(password, user.password)) {
                 console.log(kleur.green().bold('🟢 Usuario logueado correctamente'));
-                res.status(200).json(user);
+                console.log(kleur.blue().bold('🔵 GENERANDO JWT'));
+                const token = generateJWT_with_roles(user.id, user.role);
+                res.status(200).json({user, token});
             } else {
                 console.log(kleur.red().bold('🔴 No se ha podido logear el usuario'));
                 res.status(200).json({ 'msg': 'No se ha podido logear el usuario' })
