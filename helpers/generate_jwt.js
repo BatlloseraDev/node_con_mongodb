@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import kleur from 'kleur';
 
-export const generateJWT = (uid = '') => {
-    console.log(kleur.bgRed().white().bold('En la generación de JWT, el UID es: ' + uid));
-    let token = jwt.sign({ uid }, process.env.SECRETORPRIVATEKEY, {
+export const generateJWT = (id = '') => {
+    console.log(kleur.bgRed().white().bold('En la generación de JWT, el id es: ' + id));
+    let token = jwt.sign({ id }, process.env.SECRETORPRIVATEKEY, {
         expiresIn: '4h'
     });
     return token;
@@ -11,9 +11,9 @@ export const generateJWT = (uid = '') => {
 
 
 
-export const generateJWT_with_roles = (uid = '', roles = []) => {
-    console.log(kleur.bgRed().white().bold('En la generación de JWT, el UID es: ' + uid));
-    let token = jwt.sign({ uid, roles }, process.env.SECRETORPRIVATEKEY, {
+export const generateJWT_with_roles = (id = '', roles = []) => {
+    console.log(kleur.bgRed().white().bold('En la generación de JWT, el id es: ' + id));
+    let token = jwt.sign({ id, roles }, process.env.SECRETORPRIVATEKEY, {
         expiresIn: '20h'
     });
     console.log(kleur.bgGreen().white().bold('Token generado: ' + token));
