@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
+    id:{
+        type: Number,
+        required: true,
+        unique: true
+    },
     idU: {
         type: Number,
         default:null// para cuando se cree y no tenga ningún usuario asignado
