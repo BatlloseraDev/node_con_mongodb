@@ -4,6 +4,10 @@ import User from "../models/UserMongo.js";
 
 
 
-const controlador = {};
+const controlador = {
+
+
+    
+};
 
 export default controlador;
