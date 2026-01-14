@@ -6,11 +6,15 @@ import taskControllerGQL from "../controllers/taskResolverController_GQL.js";
 
 const resolvers = {
     Query: {
+        getTask: taskControllerGQL.getTask,
         getTasks: taskControllerGQL.getTasks,
         getTasksAssignated: taskControllerGQL.getTasksAssignated
     },
     Mutation:{
-        createTask: taskControllerGQL.createTask
+        createTask: taskControllerGQL.createTask,
+        updateTask: taskControllerGQL.updateTask,
+        changeTaskStatus: taskControllerGQL.changeTaskStatus,
+        deleteTask: taskControllerGQL.deleteTask
     },
 
 }

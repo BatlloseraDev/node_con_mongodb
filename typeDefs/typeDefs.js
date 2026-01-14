@@ -10,6 +10,7 @@ type Task{
     status: String!
     createdAt: String!
     updatedAt: String!
+    user: User
 }
 
 
@@ -28,7 +29,6 @@ type Role{
 
 #Inputs necesarios para crear una tarea
 input TaskCreateInput{
-    id: Int!
     description: String!
     duration: Int!
     difficulty: String!
@@ -55,6 +55,7 @@ type Mutation{
     createTask(input: TaskCreateInput!): Task
     updateTask(id: Int!, input: TaskEditInput!): Task
     deleteTask(id: Int!): Task
+    changeTaskStatus(id: Int!, status: String!): Task
 }
 
 

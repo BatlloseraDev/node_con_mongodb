@@ -3,19 +3,19 @@ import User from "../models/UserMongo.js";
 import Task from "../models/TaskMongo.js";
 
 
-export const tasksGet = async () =>{
-    try{
+export const tasksGet = async () => {
+    try {
         const tasks = await Task.find();
         if (tasks.length > 0) {
             console.log(tasks)
             console.log('Listado correcto!');
             return (tasks);
         }
-        else{
+        else {
             throw new Error("No hay registros.");
         }
-        
-    }catch(error){
+
+    } catch (error) {
         console.error('Error al obtener tareas:', error);
         throw new Error('Error al obtener tareas');
 
@@ -23,8 +23,8 @@ export const tasksGet = async () =>{
 }
 
 //tareas asignadas con lookup
-export const tasksGetAssignated = async () =>{
-    try{
+export const tasksGetAssignated = async () => {
+    try {
         const tasks = await Task.aggregate([
             {
                 $lookup: {
@@ -32,7 +32,7 @@ export const tasksGetAssignated = async () =>{
                     localField: 'idU',
                     foreignField: 'id',
                     as: 'user'
-                }             
+                }
             },
             {
                 $unwind: '$user'
@@ -43,34 +43,124 @@ export const tasksGetAssignated = async () =>{
             console.log('Listado correcto!');
             return (tasks);
         }
-        else{
+        else {
             throw new Error("No hay registros.");
         }
-        
-    }catch(error){
+
+    } catch (error) {
         console.error('Error al obtener tareas asignadas:', error);
         throw new Error('Error al obtener tareas asignadas');
+    }
+}
+
+export const taskGet = async (id) => {
+    try {
+        const task = await Task.findOne({ id: id });
+        if (task != null) {
+            console.log('Tarea encontrada!');
+            return task
+        } else {
+            throw new Error("Tarea no encontrada!");
+        }
+    } catch (error) {
+        console.error('Error al obtener tarea:', error);
+        throw new Error('Error al obtener tarea');
     }
 }
 
 
 //mutations
 
-export const createTask = async({input}) =>{
-    try{
+export const createTask = async ({ input }) => {
+    try {
         const newTask = new Task({
-            id: input.id,
+            id: await Task.countDocuments() + 1,
             description: input.description,
             duration: input.duration,
             difficulty: input.difficulty,
         });//por defecto es por hacer y no es asignado a nadie al crearse
         return await newTask.save();
     }
-    catch(error){
+    catch (error) {
         console.error('Error al crear tarea:', error);
-        throw new Error('Error al crear tarea');        
+        throw new Error('Error al crear tarea');
     }
 
+}
+export const updateTask = async ({ id, input }) => {
+    try {
+        const updatedTask = await Task.findOneAndUpdate(
+            { id: id },
+            input,
+            { new: true })
+        if (updatedTask) {
+            console.log('Tarea actualizada correctamente!');
+            //despues de actualizarla la populo con lookup
+            const result = await Task.aggregate([
+                {
+                    $match: { id: id }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'idU',
+                        foreignField: 'id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$user',
+                        preserveNullAndEmptyArrays: true
+                        //por lo que he investigado esto te lo devuelve aunque sea null
+                    }
+                }
+
+            ]);
+            console.log("Tarea actualizada y populada correctamente!")
+            return result[0];
+        } else {
+            throw new Error('Tarea no encontrada!', error);
+        }
+
+    } catch (error) {
+        console.error('Error al actualizar tarea:', error);
+        throw new Error('Error al actualizar tarea');
+    }
+}
+
+export const changeTaskStatus = async ({ id, status }) => {
+    try {//preguntar si meter seguridad de no cambiar el estado si no hay nadie asignado
+        const updatedTask = await Task.findOneAndUpdate(
+            { id: id },
+            { status: status },
+            { new: true }
+        );
+        if (updatedTask) {
+            console.log('Estado de la tarea actualizado correctamente!');
+            return updatedTask;
+        } else {
+            throw new Error('Tarea no encontrada!');
+        }
+    } catch (error) {
+        console.error('Error al cambiar el estado de la tarea:', error);
+        throw new Error('Error al cambiar el estado de la tarea');
+    }
+}
+
+export const deleteTask = async ({ id }) => {
+    try {
+        const deletedTask = await Task.deleteOne({ id: id });
+        if (deletedTask.deletedCount > 0) {
+            console.log('Tarea eliminada correctamente!');
+            return { id: id }; // Devolver un objeto con el ID de la tarea eliminada
+        } else {
+            throw new Error('Tarea no encontrada!');
+        }
+    } catch (error) {
+        console.error('Error al eliminar la tarea:', error);
+        throw new Error('Error al eliminar la tarea');
+    }
 }
 
 
