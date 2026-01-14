@@ -13,6 +13,8 @@ import typeDefs from '../typeDefs/typeDefs.js';
 import resolvers from '../resolvers/resolvers.js';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
+import { validateJWT_GQL } from '../middlewares/ValidateJWT.js';
+
 
 
 class Server {
@@ -60,7 +62,7 @@ class Server {
         this.db.once('open', () => { console.log(kleur.blue().bold('Conectado satisfactoriamente con mongo 🐵')) });
     }
 
-    async start(){
+    async start() {
         await this.serverGraphQL.start();
         this.applyGraphQLMiddleware();
         this.listen();
@@ -77,7 +79,20 @@ class Server {
     }
 
     applyGraphQLMiddleware() {
-        this.app.use(this.graphQLPath,express.json(),  expressMiddleware(this.serverGraphQL));
+        this.app.use(
+            this.graphQLPath, express.json(),
+            expressMiddleware(this.serverGraphQL, {
+                context: async ({ req }) => {
+                    try {
+                        const context = await validateJWT_GQL(req);
+                        console.log('Contexto GraphQL: Contexto validado');
+                        return context;
+                    } catch (error) {
+                        console.log('Error en la validación JWT:', error.message);
+                        throw new Error(error.message);
+                    }
+                },
+            }));
     }
 
     listen() {

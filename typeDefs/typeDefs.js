@@ -46,6 +46,7 @@ input TaskEditInput{
 
 type Query{
     getTasks: [Task]
+    getTasksAssignated: [Task]
     getTask(id: ID!): Task
 }
 

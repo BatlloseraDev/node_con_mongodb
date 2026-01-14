@@ -1,5 +1,63 @@
 //consultas GraphQL 
 import User from "../models/UserMongo";
+import Task from "../models/TaskMongo";
+
+
+export const tasksGet = async () =>{
+    try{
+        const tasks = await Task.find();
+        if (tasks.length > 0) {
+            console.log(tasks)
+            console.log('Listado correcto!');
+            return (tasks);
+        }
+        else{
+            throw new Error("No hay registros.");
+        }
+        
+    }catch(error){
+        console.error('Error al obtener tareas:', error);
+        throw new Error('Error al obtener tareas');
+
+    }
+}
+
+//tareas asignadas con lookup
+export const tasksGetAssignated = async () =>{
+    try{
+        const tasks = await Task.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'idU',
+                    foreignField: 'id',
+                    as: 'user'
+                }
+                
+            },
+            {
+                $unwind: '$user'
+            }
+        ]);
+        if (tasks.length > 0) {
+            console.log(tasks)
+            console.log('Listado correcto!');
+            return (tasks);
+        }
+        else{
+            throw new Error("No hay registros.");
+        }
+        
+    }catch(error){
+        console.error('Error al obtener tareas asignadas:', error);
+        throw new Error('Error al obtener tareas asignadas');
+    }
+}
+
+
+
+
+
 
 //Ejemplo:
 

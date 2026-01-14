@@ -57,3 +57,13 @@ export const hasRole = (...allowedRoles) =>{
         next();
     }
 }
+
+export const hasRole_GQL = (context, ...allowedRoles) =>{
+    if(!context.user){
+        throw new Error('Se requiere verificar el jwt antes que el rol');
+    }
+    const isAuthorized = context.user.roles.some(userRole => allowedRoles.includes(userRole.name));
+    if(!isAuthorized){
+        throw new Error('No tienes permiso para realizar esta acción');
+    }
+}
