@@ -29,7 +29,9 @@ export const validateJWT = (req, res, next) =>{
 
 
 export const validateJWT_GQL = (context) =>{
+
     const token = context.req.headers['x-token'];
+  
 
     if(!token){
         throw new Error('No hay token en la peticion');

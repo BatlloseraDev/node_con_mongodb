@@ -1,12 +1,16 @@
 // import {usuariosGet, usuarioGet, usuariosPost, usuariosPut, usuariosDelete} from '../controllers/userController_GQL.js';
 // import {addComentario, comentariosGet, comentariosGetAsignados, comentarioGetAsignadoA} from '../controllers/commentsController_GQL.js';
 
+import taskControllerGQL from "../controllers/taskResolverController_GQL.js";
+
+
 const resolvers = {
     Query: {
-        // añadir mas adelante
+        getTasks: taskControllerGQL.getTasks,
+        getTasksAssignated: taskControllerGQL.getTasksAssignated
     },
     Mutation:{
-        // añadir mas adelante
+        createTask: taskControllerGQL.createTask
     },
 
 }

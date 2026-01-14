@@ -1,6 +1,6 @@
 //consultas GraphQL 
-import User from "../models/UserMongo";
-import Task from "../models/TaskMongo";
+import User from "../models/UserMongo.js";
+import Task from "../models/TaskMongo.js";
 
 
 export const tasksGet = async () =>{
@@ -32,8 +32,7 @@ export const tasksGetAssignated = async () =>{
                     localField: 'idU',
                     foreignField: 'id',
                     as: 'user'
-                }
-                
+                }             
             },
             {
                 $unwind: '$user'
@@ -55,7 +54,24 @@ export const tasksGetAssignated = async () =>{
 }
 
 
+//mutations
 
+export const createTask = async({input}) =>{
+    try{
+        const newTask = new Task({
+            id: input.id,
+            description: input.description,
+            duration: input.duration,
+            difficulty: input.difficulty,
+        });//por defecto es por hacer y no es asignado a nadie al crearse
+        return await newTask.save();
+    }
+    catch(error){
+        console.error('Error al crear tarea:', error);
+        throw new Error('Error al crear tarea');        
+    }
+
+}
 
 
 

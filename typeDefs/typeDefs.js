@@ -28,6 +28,7 @@ type Role{
 
 #Inputs necesarios para crear una tarea
 input TaskCreateInput{
+    id: Int!
     description: String!
     duration: Int!
     difficulty: String!
@@ -47,7 +48,7 @@ input TaskEditInput{
 type Query{
     getTasks: [Task]
     getTasksAssignated: [Task]
-    getTask(id: ID!): Task
+    getTask(id: Int!): Task
 }
 
 type Mutation{

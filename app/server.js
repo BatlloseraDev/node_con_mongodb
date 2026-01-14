@@ -84,7 +84,7 @@ class Server {
             expressMiddleware(this.serverGraphQL, {
                 context: async ({ req }) => {
                     try {
-                        const context = await validateJWT_GQL(req);
+                        const context = await validateJWT_GQL({req});
                         console.log('Contexto GraphQL: Contexto validado');
                         return context;
                     } catch (error) {
