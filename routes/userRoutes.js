@@ -16,4 +16,7 @@ router.get('/',[validateJWT,hasRole('admin')],  controlador.getUsers);
 router.get('/:id', [validateJWT,hasRole('admin', 'standard')], controlador.getUser);
 router.put('/:id',[validateJWT,hasRole('admin', 'standard')], controlador.updateUser);
 router.delete('/:id', [validateJWT,hasRole('admin')], controlador.deleteUser);
+router.post('/populate/:n', [validateJWT,hasRole('admin')], controlador.populateUsers);
+
+
 

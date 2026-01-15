@@ -4,7 +4,7 @@ import User from "../models/UserMongo.js";
 import kleur from "kleur";
 import bcrypt from 'bcrypt';
 import { generateJWT_with_roles } from "../helpers/generate_jwt.js";
-
+import { faker } from "@faker-js/faker";
 
 
 
@@ -134,6 +134,33 @@ const controlador = {
         } catch (error) {
             console.error('❌ Error al logear el usuario:', error);
             res.status(500).json({ 'msg': 'Error al logear el usuario' });
+        }
+    },
+    populateUsers: async (req, res) => {
+        try {
+            const n = req.params.n;
+            const users = [];
+            let id_n = await User.countDocuments() + 1;
+            let temp_password = "" 
+            for (let i = 0; i < n; i++) {
+                temp_password = faker.internet.password();
+                const newUser = new User({
+                    id: id_n +i ,
+                    userName: faker.internet.username(),
+                    email: faker.internet.email(),
+                    password: await bcrypt.hash(temp_password, 10)
+                });
+                users.push(newUser);
+                console.log(`Usuario con id: ${id_n +i} y contraseña: ${temp_password} creado correctamente`); // para probar credenciales
+            }
+        
+            await User.insertMany(users);
+            console.log(kleur.green().bold('🟢 Usuarios creados correctamente'));
+            res.status(200).json(users);
+
+        }catch(error){
+            console.error('❌ Error al crear los usuarios de forma masiva:', error);
+            res.status(500).json({ 'msg': 'Error al crear los usuarios de forma masiva' });
         }
     }
 
