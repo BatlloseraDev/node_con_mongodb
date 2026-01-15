@@ -56,6 +56,7 @@ type Mutation{
     updateTask(id: Int!, input: TaskEditInput!): Task
     deleteTask(id: Int!): Task
     changeTaskStatus(id: Int!, status: String!): Task
+    asignateTask(id: Int!, idU: Int!): Task
 }
 
 

@@ -1,4 +1,4 @@
-import { taskGet, tasksGet, tasksGetAssignated, createTask, updateTask, changeTaskStatus, deleteTask } from "./taskController_GQL.js";
+import { taskGet, tasksGet, tasksGetAssignated, createTask, updateTask, changeTaskStatus, deleteTask, asignateTask } from "./taskController_GQL.js";
 import { hasRole_GQL } from "../middlewares/validateRoles.js";
 
 
@@ -76,6 +76,16 @@ const taskControllerGQL = {
         } catch (error) {
             console.error('Error al eliminar la tarea:', error);
             throw new Error('Error al eliminar la tarea');
+        }
+    },
+    asignateTask: async (_, {id, idU}, context) => {
+        try {
+            hasRole_GQL(context, 'admin');
+            const task = await asignateTask({id, idU});
+            return task;
+        } catch (error) {
+            console.error('Error al asignar tarea:', error);
+            throw new Error('Error al asignar tarea');
         }
     }
 

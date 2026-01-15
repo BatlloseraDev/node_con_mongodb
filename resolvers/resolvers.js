@@ -14,7 +14,8 @@ const resolvers = {
         createTask: taskControllerGQL.createTask,
         updateTask: taskControllerGQL.updateTask,
         changeTaskStatus: taskControllerGQL.changeTaskStatus,
-        deleteTask: taskControllerGQL.deleteTask
+        deleteTask: taskControllerGQL.deleteTask,
+        asignateTask: taskControllerGQL.asignateTask
     },
 
 }

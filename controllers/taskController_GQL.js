@@ -130,7 +130,7 @@ export const updateTask = async ({ id, input }) => {
 }
 
 export const changeTaskStatus = async ({ id, status }) => {
-    try {//preguntar si meter seguridad de no cambiar el estado si no hay nadie asignado
+    try {
         const updatedTask = await Task.findOneAndUpdate(
             { id: id },
             { status: status },
@@ -152,7 +152,7 @@ export const deleteTask = async ({ id }) => {
     try {
         const deletedTask = await Task.deleteOne({ id: id });
         if (deletedTask.deletedCount > 0) {
-            console.log('Tarea eliminada correctamente!');
+            console.log('¡Tarea eliminada correctamente!');
             return { id: id }; // Devolver un objeto con el ID de la tarea eliminada
         } else {
             throw new Error('Tarea no encontrada!');
@@ -160,6 +160,32 @@ export const deleteTask = async ({ id }) => {
     } catch (error) {
         console.error('Error al eliminar la tarea:', error);
         throw new Error('Error al eliminar la tarea');
+    }
+}
+
+
+//Asignar Tarea a alguien
+export const asignateTask = async ({id, idU}) =>{
+    try{
+        //comprobar si el usuario que se intentaAsignar existe
+        const user = await User.findOne({id: idU});
+        if(!user){
+            throw new Error('¡Usuario no encontrado!');
+        }
+        const updatedTask = await Task.findOneAndUpdate(
+            {id: id},
+            {idU: idU},
+            {new: true}
+        );
+        if(updatedTask){
+            console.log('Tarea asignada correctamente!');
+            return updatedTask;
+        }else{
+            throw new Error('Tarea no encontrada!');
+        }
+    }catch(error){
+        console.error('Error al asignar tarea:', error);
+        throw new Error('Error al asignar tarea');
     }
 }
 
