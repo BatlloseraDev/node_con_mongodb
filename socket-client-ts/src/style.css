@@ -9,11 +9,8 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  justify-content: center;
 }
 
 #app {
@@ -23,40 +20,149 @@ body {
   text-align: center;
 }
 
-.hidden {
-  display: none !important;
+/* Login Styles */
+.card {
+  background: #333;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  width: 100%;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #646cff;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: border-color 0.25s;
+  color: white;
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: #535bf2;
 }
 
-.game-area {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 50px;
-  margin: 20px 0;
+button.secondary {
+  background-color: #ff4b4b;
+  width: auto;
 }
 
-.move-placeholder {
-  font-size: 3rem;
-  border: 2px dashed #666;
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
+.hidden { display: none; }
+.error { color: #ff6b6b; margin-top: 10px; }
+
+/* Dashboard / Kanban Styles */
+.dashboard-container header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.column {
+    background: #2a2a2a;
+    padding: 1rem;
+    border-radius: 8px;
+    min-height: 200px;
+}
+
+/* Estilos para la navegación del Dashboard */
+.dashboard-nav {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    justify-content: center;
+}
+
+.nav-btn {
+    background-color: #444;
+    color: #aaa;
+    border: 1px solid #555;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background-color: #555;
+    color: white;
+}
+
+/* Botón activo (seleccionado) */
+.nav-btn.active {
+    background-color: #646cff; /* Tu color principal */
+    color: white;
+    border-color: #646cff;
+    box-shadow: 0 0 10px rgba(100, 108, 255, 0.4);
+}
+
+.hint {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 1rem;
+}
+
+/* Animación simple de entrada */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.dashboard-container header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Contenedor para agrupar los botones del header */
+.header-buttons {
+    display: flex;
+    gap: 10px; /* Espacio entre botón admin y logout */
+}
+/* Añadir a los botones dentro de la clase header-buttons un redondeo de borde */
+.header-buttons button {
+    border-radius: 10px;
+    padding: 5px;
+}
+
+
+/* Estilo para el botón de Admin */
+.admin-btn {
+    background-color: #f59e0b; /* Color ámbar/naranja para diferenciarlo */
+    color: white;
+}
+
+.admin-btn:hover {
+    background-color: #d97706;
 }
