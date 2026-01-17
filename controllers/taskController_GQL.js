@@ -129,13 +129,20 @@ export const updateTask = async ({ id, input }) => {
     }
 }
 
-export const changeTaskStatus = async ({ id, status }) => {
+export const changeTaskStatus = async ({ id, status }, idU, roles) => {
     try {
-        const updatedTask = await Task.findOneAndUpdate(
-            { id: id },
-            { status: status },
-            { new: true }
+        const updatedTask = await Task.findOne(
+            { id: id }
         );
+        //controlar que exista
+
+        //controlar que si el usuario que la actualiza es admin o es el usuario asignado a la tarea
+
+        //controlar que el nuevo estado sea correcto(para no hacer saltos 'por hacer'->'haciendo'->'hecho')
+
+        //actualizarla
+
+
         if (updatedTask) {
             console.log('Estado de la tarea actualizado correctamente!');
             return updatedTask;

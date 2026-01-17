@@ -38,33 +38,61 @@ export const renderMyTasks = async (container: HTMLDivElement) => {
         // 2. RENDER: Distribuimos las tareas en columnas
         tasks.forEach((task: any) => {
             let colId = 'col-todo';
-            if (task.status === 'haciendo') colId = 'col-doing';
-            if (task.status === 'hecha') colId = 'col-done';
+            let actionBtn = '';
+            if (task.status === 'por hacer') {
+                actionBtn = `<button class="btn-status btn-start" data-id="${task.id}" data-next="haciendo">▶️ Empezar</button>`;
+            }
+            else if (task.status === 'haciendo') {
+                colId = 'col-doing';
+                actionBtn = `<button class="btn-status btn-finish" data-id="${task.id}" data-next="hecha">✅ Terminar</button>`;
+            } else if (
+                task.status === 'hecha'
+            ) {
+                colId = 'col-done';
+
+            }
 
             const column = container.querySelector(`#${colId}`)!;
 
             const card = document.createElement('div');
             card.className = 'task-card my-task-card';
             card.innerHTML = `
-                <div>
+                <div class="task-content">
                     <strong>${task.description}</strong>
-                    <span class="badge ${task.difficulty}">${task.difficulty}</span>
+                    <div class="tags">
+                        <span class="badge ${task.difficulty}">${task.difficulty}</span>
+                    </div>
                 </div>
-                ${task.status !== 'hecha' ?
-                    `<button class="btn-release" data-id="${task.id}">🏃 Soltar</button>`
-                    : ''}
+                <div class="task-actions">
+                    ${actionBtn}
+                    ${task.status !== 'hecha' ? `<button class="btn-release" data-id="${task.id}">🏃 Soltar</button>` : ''}
+                </div>
             `;
             column.appendChild(card);
         });
+        //Cambios de estado
+        const statusButtons = container.querySelectorAll('.btn-status');
+        statusButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const button = e.target as HTMLButtonElement;
+                const taskId = Number(button.dataset.id);
+                const nextStatus = button.dataset.next;
 
-        // 3. EVENTOS: Botón Soltar
-        const buttons = container.querySelectorAll('.btn-release');
-        buttons.forEach(btn => {
+                if (nextStatus) {
+                    await changeStatus(taskId, nextStatus);
+                    renderMyTasks(container); // Recargamos para ver el cambio
+                }
+            });
+        });
+
+        // (Mantenemos el listener de Soltar tarea que ya tenías)
+        const releaseButtons = container.querySelectorAll('.btn-release');
+        releaseButtons.forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const taskId = (e.target as HTMLButtonElement).dataset.id;
-                if (confirm('¿Seguro que quieres liberar esta tarea?')) {
+                if (confirm('¿Liberar esta tarea?')) {
                     await releaseTask(Number(taskId));
-                    renderMyTasks(container); // Recargar
+                    renderMyTasks(container);
                 }
             });
         });
@@ -73,6 +101,28 @@ export const renderMyTasks = async (container: HTMLDivElement) => {
         container.innerHTML += `<p class="error">Error: ${error}</p>`;
     }
 };
+
+
+// Función para cambiar el estado
+const changeStatus = async (taskId: number, newStatus: string) => {
+
+    const mutation = `
+        mutation ChangeStatus($id: Int!, $status: String!) {
+            updateTask(id: $id, input: { status: $status }) {
+                id
+                status
+            }
+        }
+    `;
+
+    try {
+        await gqlRequest(mutation, { id: taskId, status: newStatus });
+    } catch (error: any) {
+        alert(`❌ Error: ${error.message}`);
+    }
+};
+
+
 
 const releaseTask = async (taskId: number) => {
 

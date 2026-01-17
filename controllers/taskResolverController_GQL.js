@@ -74,7 +74,7 @@ const taskControllerGQL = {
     changeTaskStatus: async (_, {id, status}, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await changeTaskStatus({id, status});
+            const task = await changeTaskStatus({id, status}, context.user.id , context.user.roles);//de esta manera puedo reutirilarlo
             return task;
         } catch (error) {
             console.error('Error al cambiar el estado de la tarea:', error);
