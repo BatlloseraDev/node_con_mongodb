@@ -1,9 +1,10 @@
-import { taskGet, tasksGet, tasksGetAssignated, createTask, updateTask, changeTaskStatus, deleteTask, asignateTask } from "./taskController_GQL.js";
+import { taskGet, tasksGet, tasksGetAssignated, createTask, updateTask, changeTaskStatus, deleteTask, asignateTask, getUserTasks, releaseTask, takeTask } from "./taskController_GQL.js";
 import { hasRole_GQL } from "../middlewares/validateRoles.js";
 
 
 
 const taskControllerGQL = {
+    //query
     getTasks: async (_, args, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
@@ -36,6 +37,18 @@ const taskControllerGQL = {
             throw new Error('Error al obtener tarea');
         }
     },
+    getUserTasks: async (_, {idU}, context) => {
+        try {
+            hasRole_GQL(context, 'admin', 'standard');
+            const tasks = await getUserTasks(idU);
+            const userTasks = tasks.filter(task => task.idU === idU);
+            return userTasks;
+        } catch (error) {
+            console.error('Error al obtener tareas del usuario:', error);
+            throw new Error('Error al obtener tareas del usuario');
+        }
+    },
+    //mutations
     createTask: async (_, {input}, context) => {
         try {
         
@@ -87,7 +100,27 @@ const taskControllerGQL = {
             console.error('Error al asignar tarea:', error);
             throw new Error('Error al asignar tarea');
         }
-    }
+    },
+    releaseTask: async (_, {id}, context) => {
+        try {
+            hasRole_GQL(context, 'admin', 'standard');
+            const task = await releaseTask({id},context.user.id);
+            return task;
+        } catch (error) {
+            console.error('Error al liberar tarea:', error);
+            throw new Error('Error al liberar tarea');
+        }   
+    },
+    takeTask: async (_, {id}, context) => {
+        try {
+            hasRole_GQL(context, 'admin', 'standard');
+            const task = await takeTask({id},context.user.id);
+            return task;
+        } catch (error) {
+            console.error('Error al tomar tarea:', error);
+            throw new Error('Error al tomar tarea');
+        }   
+    },
 
      
 

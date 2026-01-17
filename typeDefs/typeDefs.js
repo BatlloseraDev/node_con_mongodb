@@ -48,6 +48,7 @@ input TaskEditInput{
 type Query{
     getTasks: [Task]
     getTasksAssignated: [Task]
+    getUserTasks(idU: Int!): [Task]
     getTask(id: Int!): Task
 }
 
@@ -57,6 +58,8 @@ type Mutation{
     deleteTask(id: Int!): Task
     changeTaskStatus(id: Int!, status: String!): Task
     asignateTask(id: Int!, idU: Int!): Task
+    releaseTask(id: Int!): Task
+    takeTask(id: Int!): Task
 }
 
 

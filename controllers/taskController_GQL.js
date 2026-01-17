@@ -164,31 +164,96 @@ export const deleteTask = async ({ id }) => {
 }
 
 
-//Asignar Tarea a alguien
-export const asignateTask = async ({id, idU}) =>{
-    try{
+//Asignar Tarea a alguien como admin
+export const asignateTask = async ({ id, idU }) => {
+    try {
         //comprobar si el usuario que se intentaAsignar existe
-        const user = await User.findOne({id: idU});
-        if(!user){
+        const user = await User.findOne({ id: idU });
+        if (!user) {
             throw new Error('¡Usuario no encontrado!');
         }
         const updatedTask = await Task.findOneAndUpdate(
-            {id: id},
-            {idU: idU},
-            {new: true}
+            { id: id },
+            { idU: idU },
+            { new: true }
         );
-        if(updatedTask){
+        if (updatedTask) {
             console.log('Tarea asignada correctamente!');
             return updatedTask;
-        }else{
+        } else {
             throw new Error('Tarea no encontrada!');
         }
-    }catch(error){
+    } catch (error) {
         console.error('Error al asignar tarea:', error);
         throw new Error('Error al asignar tarea');
     }
 }
 
+export const getUserTasks = async (idU) => {
+    try {
+        const tasks = await Task.find({ idU: idU });
+        if (tasks.length > 0) {
+            console.log(tasks);
+            console.log('Listado correcto!');
+            return (tasks);
+        } else {
+            throw new Error("No hay registros.");
+        }
+    } catch (error) {
+        console.error('Error al obtener tareas del usuario:', error);
+        throw new Error('Error al obtener tareas del usuario');
+    }
+}
+
+export const releaseTask = async ({ id }, idU) => {
+    try {
+        //comprobar que el idU es el mismo que tiene la tarea
+        const task = await Task.findOne({ id: id });
+        if (task.idU !== idU) {
+            throw new Error('¡No tienes permiso para liberar esta tarea!');
+        }
+        //en caso afirmativo liberar la tarea
+        const updatedTask = await Task.findOneAndUpdate(
+            { id: id },
+            { idU: null },
+            { new: true }
+        );
+        if (updatedTask) {
+            console.log('Tarea liberada correctamente!');
+            return updatedTask;
+        } else {
+            throw new Error('Tarea no encontrada!');
+        }
+    } catch (error) {
+        console.error('Error al liberar tarea:', error);
+        throw new Error('Error al liberar tarea');
+    }
+}
+
+export const takeTask = async ({ id}, idU ) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
+    try {
+        //comprobar que la tarea tiene el idU a null
+        const task = await Task.findOne({ id: id });
+        if (task.idU !== null) {
+            throw new Error('¡La tarea ya está asignada!');
+        }
+        //en caso afirmativo asignar la tarea
+        const updatedTask = await Task.findOneAndUpdate(
+            { id: id },
+            { idU: idU },
+            { new: true }
+        );
+        if (updatedTask) {
+            console.log('Tarea asignada correctamente!');
+            return updatedTask;
+        } else {
+            throw new Error('Tarea no encontrada!');
+        }
+    } catch (error) {
+        console.error('Error al asignar tarea:', error);
+        throw new Error('Error al asignar tarea');
+    }
+}
 
 
 //Ejemplo:

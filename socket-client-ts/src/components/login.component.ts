@@ -1,5 +1,5 @@
 export const renderLogin = (element: HTMLDivElement, onLoginSuccess: () => void) => {
-    const API_URL = 'http://localhost:9090/api/users'; 
+    const API_URL = 'http://localhost:9090/api/usuarios'; 
 
     element.innerHTML = `
       <div class="login-container">
