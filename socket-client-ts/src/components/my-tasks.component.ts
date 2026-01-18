@@ -35,7 +35,7 @@ export const renderMyTasks = async (container: HTMLDivElement) => {
         const data = await gqlRequest(query, { userId: user.id });
         const tasks = data.getUserTasks;
 
-        // 2. RENDER: Distribuimos las tareas en columnas
+        // las tareas en columnas
         tasks.forEach((task: any) => {
             let colId = 'col-todo';
             let actionBtn = '';
@@ -80,7 +80,7 @@ export const renderMyTasks = async (container: HTMLDivElement) => {
 
                 if (nextStatus) {
                     await changeStatus(taskId, nextStatus);
-                    renderMyTasks(container); // Recargamos para ver el cambio
+                    renderMyTasks(container); // Recargo para ver el cambio
                 }
             });
         });
@@ -107,16 +107,17 @@ export const renderMyTasks = async (container: HTMLDivElement) => {
 const changeStatus = async (taskId: number, newStatus: string) => {
 
     const mutation = `
-        mutation ChangeStatus($id: Int!, $status: String!) {
-            updateTask(id: $id, input: { status: $status }) {
+        mutation Mutation($changeTaskStatusId: Int!, $status: String!) {
+            changeTaskStatus(id: $changeTaskStatusId, status: $status) {
                 id
+                idU
                 status
             }
         }
     `;
 
     try {
-        await gqlRequest(mutation, { id: taskId, status: newStatus });
+        await gqlRequest(mutation, { changeTaskStatusId: taskId, status: newStatus });
     } catch (error: any) {
         alert(`❌ Error: ${error.message}`);
     }
@@ -134,7 +135,7 @@ const releaseTask = async (taskId: number) => {
                 idU
             }
         }
-    `;
+    `;// cuando se suelta una task no se cambia de estado
 
     try {
         await gqlRequest(mutation, { releaseTaskId: taskId });

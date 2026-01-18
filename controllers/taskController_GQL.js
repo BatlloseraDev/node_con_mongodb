@@ -131,17 +131,35 @@ export const updateTask = async ({ id, input }) => {
 
 export const changeTaskStatus = async ({ id, status }, idU, roles) => {
     try {
-        const updatedTask = await Task.findOne(
+        const requiredTask = await Task.findOne(
             { id: id }
         );
         //controlar que exista
-
+        if (!requiredTask) {
+            throw new Error('Tarea no encontrada!');
+        }
         //controlar que si el usuario que la actualiza es admin o es el usuario asignado a la tarea
-
-        //controlar que el nuevo estado sea correcto(para no hacer saltos 'por hacer'->'haciendo'->'hecho')
-
+        if (!roles.some(rol => rol.name === 'admin') && requiredTask.idU !== idU) {
+            throw new Error('No tienes permiso para cambiar el estado de esta tarea!');
+        }
+        //controlar que el nuevo estado sea correcto(para no hacer saltos 'por hacer'->'haciendo'->'hecho') solo si es un usuario standard y no admin
+        if (roles.some(rol => rol.name === 'standard') && !roles.some(rol => rol.name === 'admin')) {
+            const validTransitions = {
+                'por hacer': 'haciendo',
+                'haciendo': 'hecho'
+            };
+            const currentStatus = requiredTask.status;
+            const newStatus = status;
+            if (!validTransitions[currentStatus] || validTransitions[currentStatus] !== newStatus) {
+                throw new Error(`Transición de estado inválida de '${currentStatus}' a '${newStatus}'`);
+            }
+        }
         //actualizarla
-
+        const updatedTask = await Task.findOneAndUpdate(
+            { id: id },
+            { status: status },
+            { new: true }
+        );
 
         if (updatedTask) {
             console.log('Estado de la tarea actualizado correctamente!');
@@ -237,7 +255,7 @@ export const releaseTask = async ({ id }, idU) => {
     }
 }
 
-export const takeTask = async ({ id}, idU ) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
+export const takeTask = async ({ id }, idU) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
     try {
         //comprobar que la tarea tiene el idU a null
         const task = await Task.findOne({ id: id });
