@@ -52,6 +52,7 @@ button {
   font-weight: 500;
   background-color: #646cff;
   border: 1px solid transparent;
+  border-radius: 4px;
   cursor: pointer;
   transition: border-color 0.25s;
   color: white;
@@ -64,6 +65,7 @@ button:hover {
 button.secondary {
   background-color: #ff4b4b;
   width: auto;
+  
 }
 
 .hidden { display: none; }
@@ -237,4 +239,24 @@ button.secondary {
 
 .btn-finish:hover {
     background-color: #059669;
+}
+
+.filter-card {
+    background: #3a3a3a;
+    margin-bottom: 20px;
+}
+.filter-row {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.filter-row label {
+    min-width: 120px;
+    font-weight: bold;
+    text-align: left;
+}
+.checkbox-row {
+    justify-content: flex-start;
 }

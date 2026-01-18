@@ -44,9 +44,27 @@ input TaskEditInput{
     idU: Int
 }
 
+enum Difficulty{
+    XS
+    S
+    M
+    L
+    XL
+}
+
+#Los input de filtros
+input TaskFilter{
+    difficulty: String #Filtro de dificultad
+    minDifficulty: String #Filtro de de rango minimo de dificultad
+    maxDifficulty: String #Filtro de de rango maximo de dificultad
+    assignedTo: Int #Filtro de persona especifica (idU)
+    isUnassigned: Boolean #Filtro sin asignar (aunque ya lo proceso en el front de otra manera..)
+    sortBy: String #Filtro de ordenación
+}
+
 
 type Query{
-    getTasks: [Task]
+    getTasks(filter: TaskFilter): [Task]
     getTasksAssignated: [Task]
     getUserTasks(idU: Int!): [Task]
     getTask(id: Int!): Task

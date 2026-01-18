@@ -2,18 +2,88 @@
 import User from "../models/UserMongo.js";
 import Task from "../models/TaskMongo.js";
 
-
-export const tasksGet = async () => {
+const difficultyMap = {
+    XS: 1,
+    S: 2,
+    M: 3,
+    L: 4,
+    XL: 5
+};// para el filtro
+export const tasksGet = async ({ filter }) => {
     try {
-        const tasks = await Task.find();
-        if (tasks.length > 0) {
-            console.log(tasks)
-            console.log('Listado correcto!');
-            return (tasks);
+
+        if (!filter) {
+            const tasks = await Task.find();
+            if (tasks.length > 0) {
+                console.log(tasks)
+                console.log('Listado correcto!');
+                return (tasks);
+            }
+            else {
+                throw new Error("No hay registros.");
+            }
+        }// en caso de que venga sin filtros 
+
+        let matchStage = {};
+
+        //filtrado por dificultad exacta
+
+        if (filter.difficulty) {
+            matchStage.difficulty = filter.difficulty;
         }
-        else {
-            throw new Error("No hay registros.");
+
+        //filtrado por dificultad en rango
+        if (filter.minDifficulty || filter.maxDifficulty) {
+            const minVal = difficultyMap[filter.minDifficulty] || 0;
+            const maxVal = difficultyMap[filter.maxDifficulty] || 10; //como no hay mas es mas que suficiente
+
+            //tras muchos fallos y errores al final pregunte a la ia como hacer esto que quería hacer por eso el tema de object 
+            const allowedDifficulties = Object.keys(difficultyMap).filter(key => {
+                const val = difficultyMap[key];
+                return val >= minVal && val <= maxVal;
+            });
+            matchStage.difficulty = { $in: allowedDifficulties };
         }
+        //filtrado por persona
+        if (filter.assignedTo) {
+            matchStage.idU = Number(filter.assignedTo);
+        }
+        //filtrado por tarea sin asignar
+        if (filter.isUnassigned === true) { //el igual a true es por que compueba si existe no su valor 
+            matchStage.idU = null;
+        }
+
+        //en esta parte construyo la query
+        const pipeline = [
+            //  Filtrado $match equivale a .find(query) 
+            {
+                $match: matchStage
+            },
+            {
+                $lookup: {
+                    from: 'users',      
+                    localField: 'idU',  
+                    foreignField: 'id',
+                    as: 'user'          
+                }
+            },
+            {
+                $unwind: {
+                    path: '$user',
+                    preserveNullAndEmptyArrays: true 
+                }
+            }
+        ];
+
+        //ordenación
+        if (filter && filter.sortBy === 'duration_difficulty') {
+            pipeline.push({
+                $sort: { duration: 1, difficulty: 1 }
+            });
+        }
+        const result = await Task.aggregate(pipeline);
+        console.log(result)
+        return result;
 
     } catch (error) {
         console.error('Error al obtener tareas:', error);

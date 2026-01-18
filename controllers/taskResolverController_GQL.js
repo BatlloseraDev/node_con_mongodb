@@ -5,10 +5,10 @@ import { hasRole_GQL } from "../middlewares/validateRoles.js";
 
 const taskControllerGQL = {
     //query
-    getTasks: async (_, args, context) => {
+    getTasks: async (_, {filter}, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const tasks = await tasksGet();
+            const tasks = await tasksGet({filter});
             return tasks;
         } catch (error) {
             console.error('Error al obtener tareas:', error);
