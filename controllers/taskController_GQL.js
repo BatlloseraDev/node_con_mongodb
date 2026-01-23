@@ -53,6 +53,7 @@ export const tasksGet = async ({ filter }) => {
             matchStage.idU = null;
         }
 
+
         //en esta parte construyo la query
         const pipeline = [
             //  Filtrado $match equivale a .find(query) 
@@ -61,22 +62,22 @@ export const tasksGet = async ({ filter }) => {
             },
             {
                 $lookup: {
-                    from: 'users',      
-                    localField: 'idU',  
+                    from: 'users',
+                    localField: 'idU',
                     foreignField: 'id',
-                    as: 'user'          
+                    as: 'user'
                 }
             },
             {
                 $unwind: {
                     path: '$user',
-                    preserveNullAndEmptyArrays: true 
+                    preserveNullAndEmptyArrays: true
                 }
             }
         ];
 
         //ordenación
-        if (filter && filter.sortBy === 'duration_difficulty') {
+        if (filter.sortBy && filter.sortBy === 'duration_difficulty') {
             pipeline.push({
                 $sort: { duration: 1, difficulty: 1 }
             });
@@ -350,6 +351,67 @@ export const takeTask = async ({ id }, idU) => { //como usuario normal solo pued
     }
 }
 
+export const getTaskCount = async ({ filter }) => {
+    try {
+        let query = {};
+        if (filter && filter.difficulty) {
+            query.difficulty = filter.difficulty;//con esto si paso XL desde el front no tengo que hacer conversiones
+        }
+
+        const count = await Task.countDocuments(query);
+        console.log(`Conteo de tareas desde el back (${filter?.difficulty || 'Todas'}): ${count}`);
+        return count;
+    }
+    catch (error) {
+        console.error('Error al obtener el conteo de tareas:', error);
+        throw new Error('Error al obtener el conteo de tareas');
+    }
+}
+
+//(La consulta personalizada): Ranking de usuarios con más tareas "hechas"
+
+export const getTaskUserRanking = async () => {
+    try {
+        const ranking = await Task.aggregate([
+            {
+                $match: { status: 'hecha' }
+            },
+            {
+                $group: {
+                    _id: "$idU",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { count: -1 }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: '_id',
+                    foreignField: 'id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $project: {// me estaba liando mucho en solucionar como devolver bien las cosas
+                    _id: 0,
+                    userName: "$user.userName",
+                    tasksCompleted: "$count"
+                }
+            }
+        ]);
+        console.log('Ranking de usuarios obtenido correctamente: ' + ranking);
+        return ranking;
+
+    } catch (error) {
+        console.error('Error al obtener el ranking de usuarios:', error);
+        throw new Error('Error al obtener el ranking de usuarios');
+    }
+}
 
 //Ejemplo:
 

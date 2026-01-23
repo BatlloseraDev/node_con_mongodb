@@ -123,7 +123,8 @@ const loadFilteredTasks = async (container: HTMLDivElement, filter: any) => {
 
         container.innerHTML = ''; // Limpiar cargando
         tasks.forEach((task: any) => {
-            const assignedText = task.assignedTo ? `👤 ${task.assignedTo.userName}` : '⚪ Libre';
+            console.log(task);
+            const assignedText = task.user ? `👤 ${task.user.userName}` : '⚪ Libre';
 
             const card = document.createElement('div');
             card.className = 'task-card';

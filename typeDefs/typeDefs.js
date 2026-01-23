@@ -62,12 +62,21 @@ input TaskFilter{
     sortBy: String #Filtro de ordenación
 }
 
+type UserRanking {
+    userId: ID
+    userName: String
+    tasksCompleted: Int
+}
+
+
 
 type Query{
     getTasks(filter: TaskFilter): [Task]
     getTasksAssignated: [Task]
     getUserTasks(idU: Int!): [Task]
     getTask(id: Int!): Task
+    TaskCountDificulty(filter: TaskFilter): Int
+    TaskUserRanking: [UserRanking]
 }
 
 type Mutation{
@@ -78,6 +87,7 @@ type Mutation{
     asignateTask(id: Int!, idU: Int!): Task
     releaseTask(id: Int!): Task
     takeTask(id: Int!): Task
+
 }
 
 

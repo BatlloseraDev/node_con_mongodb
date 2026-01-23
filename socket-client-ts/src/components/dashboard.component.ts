@@ -1,6 +1,7 @@
 import { renderAvailableTasks } from "./tasks-available.component";
 import { renderMyTasks } from "./my-tasks.component";
 import { renderFilterTasks } from "./filter-tasks.component";
+import { renderRanking } from "./ranking.component";
 
 export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) => {
   // Recupero el usuario
@@ -26,6 +27,7 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
           <button id="btn-available" class="nav-btn active">Tareas Disponibles</button>
           <button id="btn-mine" class="nav-btn">Mis Tareas</button>
           <button id="btn-filter" class="nav-btn"> Buscar</button>
+          <button id="btn-ranking" class="nav-btn">🏆 Ranking</button>
         </nav>
   
         <main id="content-area">
@@ -39,6 +41,7 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
   const btnFilter = element.querySelector<HTMLButtonElement>('#btn-filter')!;
   const contentArea = element.querySelector<HTMLDivElement>('#content-area')!;
   const btnLogout = element.querySelector<HTMLButtonElement>('#logout-btn')!;
+  const btnRanking = element.querySelector<HTMLButtonElement>('#btn-ranking')!;
 
   // Referencia condicional al botón de admin 
   const btnAdmin = element.querySelector<HTMLButtonElement>('#btn-admin');
@@ -78,6 +81,14 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     onLogout();
+  });
+
+  // Ranking
+  btnRanking.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btnRanking.classList.add('active');
+
+    renderRanking(contentArea);
   });
 
   // Carga inicial por defecto

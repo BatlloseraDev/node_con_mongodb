@@ -9,7 +9,9 @@ const resolvers = {
         getTask: taskControllerGQL.getTask,
         getTasks: taskControllerGQL.getTasks,
         getTasksAssignated: taskControllerGQL.getTasksAssignated,
-        getUserTasks: taskControllerGQL.getUserTasks
+        getUserTasks: taskControllerGQL.getUserTasks,
+        TaskCountDificulty: taskControllerGQL.TaskCountDificulty,
+        TaskUserRanking: taskControllerGQL.TaskUserRanking
     },
     Mutation:{
         createTask: taskControllerGQL.createTask,
