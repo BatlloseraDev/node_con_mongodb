@@ -2,6 +2,7 @@ import { renderAvailableTasks } from "./tasks-available.component";
 import { renderMyTasks } from "./my-tasks.component";
 import { renderFilterTasks } from "./filter-tasks.component";
 import { renderRanking } from "./ranking.component";
+import { renderTaskCount } from "./task-count.component";
 
 export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) => {
   // Recupero el usuario
@@ -27,7 +28,8 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
           <button id="btn-available" class="nav-btn active">Tareas Disponibles</button>
           <button id="btn-mine" class="nav-btn">Mis Tareas</button>
           <button id="btn-filter" class="nav-btn"> Buscar</button>
-          <button id="btn-ranking" class="nav-btn">🏆 Ranking</button>
+          <button id="btn-stats" class="nav-btn"> Estadísticas</button>
+          <button id="btn-ranking" class="nav-btn"> Ranking</button>
         </nav>
   
         <main id="content-area">
@@ -42,6 +44,8 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
   const contentArea = element.querySelector<HTMLDivElement>('#content-area')!;
   const btnLogout = element.querySelector<HTMLButtonElement>('#logout-btn')!;
   const btnRanking = element.querySelector<HTMLButtonElement>('#btn-ranking')!;
+  const btnStats = element.querySelector<HTMLButtonElement>('#btn-stats')!;
+
 
   // Referencia condicional al botón de admin 
   const btnAdmin = element.querySelector<HTMLButtonElement>('#btn-admin');
@@ -89,6 +93,14 @@ export const renderDashboard = (element: HTMLDivElement, onLogout: () => void) =
     btnRanking.classList.add('active');
 
     renderRanking(contentArea);
+  });
+
+  // Conteo por dificultad
+  btnStats.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btnStats.classList.add('active');
+
+    renderTaskCount(contentArea);
   });
 
   // Carga inicial por defecto
