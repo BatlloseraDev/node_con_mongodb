@@ -9,6 +9,15 @@ const difficultyMap = {
     L: 4,
     XL: 5
 };// para el filtro
+
+const notifyUpdate = (io) => {
+    console.log(io)
+    if(io) {
+        io.emit('server:tasks-update', {msg: 'Lista actualizado'});
+        console.log('Evento socket emitido: server:task-update')
+    }
+}
+
 export const tasksGet = async ({ filter }) => {
     try {
 
@@ -83,7 +92,7 @@ export const tasksGet = async ({ filter }) => {
             });
         }
         const result = await Task.aggregate(pipeline);
-        console.log(result)
+        console.log("Tareas cargadas correctamente")
         return result;
 
     } catch (error) {
@@ -142,7 +151,7 @@ export const taskGet = async (id) => {
 
 //mutations
 
-export const createTask = async ({ input }) => {
+export const createTask = async ({ input }, io) => {
     try {
         const newTask = new Task({
             id: await Task.countDocuments() + 1,
@@ -150,7 +159,9 @@ export const createTask = async ({ input }) => {
             duration: input.duration,
             difficulty: input.difficulty,
         });//por defecto es por hacer y no es asignado a nadie al crearse
-        return await newTask.save();
+        const saved = await newTask.save()
+        notifyUpdate(io)
+        return saved
     }
     catch (error) {
         console.error('Error al crear tarea:', error);
@@ -244,11 +255,12 @@ export const changeTaskStatus = async ({ id, status }, idU, roles) => {
     }
 }
 
-export const deleteTask = async ({ id }) => {
+export const deleteTask = async ({ id }, io) => {
     try {
         const deletedTask = await Task.deleteOne({ id: id });
         if (deletedTask.deletedCount > 0) {
             console.log('¡Tarea eliminada correctamente!');
+            notifyUpdate(io)
             return { id: id }; // Devolver un objeto con el ID de la tarea eliminada
         } else {
             throw new Error('Tarea no encontrada!');
@@ -261,7 +273,7 @@ export const deleteTask = async ({ id }) => {
 
 
 //Asignar Tarea a alguien como admin
-export const asignateTask = async ({ id, idU }) => {
+export const asignateTask = async ({ id, idU }, io) => {
     try {
         //comprobar si el usuario que se intentaAsignar existe
         const user = await User.findOne({ id: idU });
@@ -275,6 +287,7 @@ export const asignateTask = async ({ id, idU }) => {
         );
         if (updatedTask) {
             console.log('Tarea asignada correctamente!');
+            notifyUpdate(io);
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');
@@ -301,7 +314,7 @@ export const getUserTasks = async (idU) => {
     }
 }
 
-export const releaseTask = async ({ id }, idU) => {
+export const releaseTask = async ({ id }, idU, io) => {
     try {
         //comprobar que el idU es el mismo que tiene la tarea
         const task = await Task.findOne({ id: id });
@@ -316,6 +329,7 @@ export const releaseTask = async ({ id }, idU) => {
         );
         if (updatedTask) {
             console.log('Tarea liberada correctamente!');
+            notifyUpdate(io);
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');
@@ -326,7 +340,7 @@ export const releaseTask = async ({ id }, idU) => {
     }
 }
 
-export const takeTask = async ({ id }, idU) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
+export const takeTask = async ({ id }, idU , io) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
     try {
         //comprobar que la tarea tiene el idU a null
         const task = await Task.findOne({ id: id });
@@ -340,7 +354,8 @@ export const takeTask = async ({ id }, idU) => { //como usuario normal solo pued
             { new: true }
         );
         if (updatedTask) {
-            console.log('Tarea asignada correctamente!');
+            console.log('Tarea asignada correctamente! Llamando a al web-socket');
+            notifyUpdate(io)
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');

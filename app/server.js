@@ -15,6 +15,9 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import { validateJWT_GQL } from '../middlewares/ValidateJWT.js';
 
+import { createServer } from 'http'
+import { Server as SocketServer } from 'socket.io';
+
 
 
 class Server {
@@ -24,10 +27,16 @@ class Server {
         this.userPath = '/api/usuarios';
         this.taskPath = '/api/tareas';
 
+        this.httpServer = createServer(this.app)
+        this.io = new SocketServer(this.httpServer, {
+            cors: {
+                origin: "*",
+                methods: ["GET", "POST"]
+            }
+        });
+        console.log('✅ Socket.io inicializado en constructor:', !!this.io);// esto lo he implementado porque me estaba dando errores
         this.middlewares();
-
         this.conectarMongoose();
-
         this.routes();
 
         this.serverGraphQL = new ApolloServer({
@@ -49,7 +58,6 @@ class Server {
                 }
             ]
         })
-
     }
 
     conectarMongoose() {
@@ -79,12 +87,14 @@ class Server {
     }
 
     applyGraphQLMiddleware() {
+        const ioInstance = this.io;
         this.app.use(
             this.graphQLPath, express.json(),
             expressMiddleware(this.serverGraphQL, {
                 context: async ({ req }) => {
                     try {
-                        const context = await validateJWT_GQL({req});
+                        const context = await validateJWT_GQL({ req });
+                        context.io = ioInstance
                         console.log('Contexto GraphQL: Contexto validado');
                         return context;
                     } catch (error) {
@@ -96,13 +106,24 @@ class Server {
     }
 
     listen() {
-        this.app.listen(process.env.PORT, () => {
-            console.log(kleur.green().bold(`🟢 Servidor Mongo escuchando en el puerto: ${process.env.PORT}`));
+        this.httpServer.listen(process.env.PORT, () => {
+            console.log(kleur.green().bold(`🟢 Servidor Mongo + Socket.io escuchando en el puerto: ${process.env.PORT}`));
             console.log(kleur.green().bold(`🟢 GraphQL escuchando en el puerto: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.graphQLPath}`));
             console.log(kleur.blue().bold(`🔵 Servidor API Rest usuarios escuchando en: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.userPath}`));
             console.log(kleur.blue().bold(`🔵 Servidor API Rest tasks escuchando en: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.taskPath}`));
         })
-        this.applyGraphQLMiddleware();
+        this.io.on('connection', (socket) => {
+            console.log(kleur.magenta('🔌 Cliente conectado a Socket.io: ' + socket.id));
+        });
+
+
+        // this.app.listen(process.env.PORT, () => {
+        //     console.log(kleur.green().bold(`🟢 Servidor Mongo escuchando en el puerto: ${process.env.PORT}`));
+        //     console.log(kleur.green().bold(`🟢 GraphQL escuchando en el puerto: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.graphQLPath}`));
+        //     console.log(kleur.blue().bold(`🔵 Servidor API Rest usuarios escuchando en: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.userPath}`));
+        //     console.log(kleur.blue().bold(`🔵 Servidor API Rest tasks escuchando en: ${process.env.DB_URL_GRAPHQL}:${process.env.PORT}${this.taskPath}`));
+        // })
+        // this.applyGraphQLMiddleware();
         console.log(kleur.blue().bold(`🐵 Mongo: ${process.env.DB_PORT}  /  Datos de conexión: ${process.env.DB_DATABASE} ${process.env.DB_URL}. Conectando...`));
     }
 }

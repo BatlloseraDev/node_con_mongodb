@@ -53,7 +53,7 @@ const taskControllerGQL = {
         try {
 
             hasRole_GQL(context, 'admin');
-            const task = await createTask({ input });
+            const task = await createTask({ input }, context.io);
             return task;
         } catch (error) {
             console.error('Error al crear tarea:', error);
@@ -84,7 +84,7 @@ const taskControllerGQL = {
     deleteTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin');
-            const task = await deleteTask({ id });
+            const task = await deleteTask({ id }, context.io);
             return task;
         } catch (error) {
             console.error('Error al eliminar la tarea:', error);
@@ -94,7 +94,7 @@ const taskControllerGQL = {
     asignateTask: async (_, { id, idU }, context) => {
         try {
             hasRole_GQL(context, 'admin');
-            const task = await asignateTask({ id, idU });
+            const task = await asignateTask({ id, idU }, context.io);
             return task;
         } catch (error) {
             console.error('Error al asignar tarea:', error);
@@ -104,7 +104,7 @@ const taskControllerGQL = {
     releaseTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await releaseTask({ id }, context.user.id);
+            const task = await releaseTask({ id }, context.user.id, context.io);
             return task;
         } catch (error) {
             console.error('Error al liberar tarea:', error);
@@ -114,7 +114,9 @@ const taskControllerGQL = {
     takeTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await takeTask({ id }, context.user.id);
+            console.log("Antes de llamar al siguiente controllador")
+            console.log(context.io)
+            const task = await takeTask({ id }, context.user.id, context.io);
             return task;
         } catch (error) {
             console.error('Error al tomar tarea:', error);
