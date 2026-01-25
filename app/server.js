@@ -18,6 +18,8 @@ import { validateJWT_GQL } from '../middlewares/ValidateJWT.js';
 import { createServer } from 'http'
 import { Server as SocketServer } from 'socket.io';
 
+import { createClient } from '@redis/client';
+
 
 
 class Server {
@@ -34,10 +36,15 @@ class Server {
                 methods: ["GET", "POST"]
             }
         });
-        console.log('✅ Socket.io inicializado en constructor:', !!this.io);// esto lo he implementado porque me estaba dando errores
+        //console.log('✅ Socket.io inicializado en constructor:', !!this.io);// esto lo he implementado porque me estaba dando errores
+
+        this.conectarRedis();
         this.middlewares();
         this.conectarMongoose();
         this.routes();
+
+
+
 
         this.serverGraphQL = new ApolloServer({
             typeDefs,
@@ -59,6 +66,14 @@ class Server {
             ]
         })
     }
+
+    async conectarRedis() {
+        this.redisClient = createClient();
+        this.redisClient.on('error', (err) => console.log('Redis Client Error', err));
+        await this.redisClient.connect();
+        console.log(kleur.yellow(`🌎 Conectado a Redis`));
+    }
+
 
     conectarMongoose() {
         mongoose.connect(process.env.DB_URL, {
