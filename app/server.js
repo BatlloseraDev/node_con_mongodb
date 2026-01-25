@@ -103,6 +103,7 @@ class Server {
 
     applyGraphQLMiddleware() {
         const ioInstance = this.io;
+        const redisInstance = this.redisClient;
         this.app.use(
             this.graphQLPath, express.json(),
             expressMiddleware(this.serverGraphQL, {
@@ -110,6 +111,7 @@ class Server {
                     try {
                         const context = await validateJWT_GQL({ req });
                         context.io = ioInstance
+                        context.redisClient = redisInstance; 
                         console.log('Contexto GraphQL: Contexto validado');
                         return context;
                     } catch (error) {

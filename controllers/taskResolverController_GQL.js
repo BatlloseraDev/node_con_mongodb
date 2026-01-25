@@ -8,7 +8,7 @@ const taskControllerGQL = {
     getTasks: async (_, { filter }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const tasks = await tasksGet({ filter });
+            const tasks = await tasksGet({ filter }, context.redisClient, context.redisClient);
             return tasks;
         } catch (error) {
             console.error('Error al obtener tareas:', error);
@@ -20,7 +20,7 @@ const taskControllerGQL = {
         try {
 
             hasRole_GQL(context, 'admin', 'standard');
-            const tasks = await tasksGetAssignated();
+            const tasks = await tasksGetAssignated(context.redisClient);
             return tasks;
         } catch (error) {
             console.error('Error al obtener tareas asignadas:', error);
@@ -30,7 +30,7 @@ const taskControllerGQL = {
     getTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await taskGet(id);
+            const task = await taskGet(id, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al obtener tarea:', error);
@@ -40,7 +40,7 @@ const taskControllerGQL = {
     getUserTasks: async (_, { idU }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const tasks = await getUserTasks(idU);
+            const tasks = await getUserTasks(idU, context.redisClient);
             const userTasks = tasks.filter(task => task.idU === idU);
             return userTasks;
         } catch (error) {
@@ -53,7 +53,7 @@ const taskControllerGQL = {
         try {
 
             hasRole_GQL(context, 'admin');
-            const task = await createTask({ input }, context.io);
+            const task = await createTask({ input }, context.io, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al crear tarea:', error);
@@ -63,7 +63,7 @@ const taskControllerGQL = {
     updateTask: async (_, { id, input }, context) => {
         try {
             hasRole_GQL(context, 'admin');
-            const task = await updateTask({ id, input });
+            const task = await updateTask({ id, input }, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al actualizar tarea:', error);
@@ -74,7 +74,7 @@ const taskControllerGQL = {
     changeTaskStatus: async (_, { id, status }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await changeTaskStatus({ id, status }, context.user.id, context.user.roles);//de esta manera puedo reutirilarlo
+            const task = await changeTaskStatus({ id, status }, context.user.id, context.user.roles, context.redisClient);//de esta manera puedo reutirilarlo
             return task;
         } catch (error) {
             console.error('Error al cambiar el estado de la tarea:', error);
@@ -84,7 +84,7 @@ const taskControllerGQL = {
     deleteTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin');
-            const task = await deleteTask({ id }, context.io);
+            const task = await deleteTask({ id }, context.io, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al eliminar la tarea:', error);
@@ -94,7 +94,7 @@ const taskControllerGQL = {
     asignateTask: async (_, { id, idU }, context) => {
         try {
             hasRole_GQL(context, 'admin');
-            const task = await asignateTask({ id, idU }, context.io);
+            const task = await asignateTask({ id, idU }, context.io, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al asignar tarea:', error);
@@ -104,7 +104,7 @@ const taskControllerGQL = {
     releaseTask: async (_, { id }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const task = await releaseTask({ id }, context.user.id, context.io);
+            const task = await releaseTask({ id }, context.user.id, context.io, context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al liberar tarea:', error);
@@ -116,7 +116,7 @@ const taskControllerGQL = {
             hasRole_GQL(context, 'admin', 'standard');
             console.log("Antes de llamar al siguiente controllador")
             console.log(context.io)
-            const task = await takeTask({ id }, context.user.id, context.io);
+            const task = await takeTask({ id }, context.user.id, context.io , context.redisClient);
             return task;
         } catch (error) {
             console.error('Error al tomar tarea:', error);
@@ -126,7 +126,7 @@ const taskControllerGQL = {
     TaskCountDificulty: async (_, { filter }, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const count = await getTaskCount({ filter });
+            const count = await getTaskCount({ filter }, context.redisClient);
             return count;
         } catch (error) {
             console.error('Error al obtener el conteo de tareas:', error);
@@ -136,7 +136,7 @@ const taskControllerGQL = {
     TaskUserRanking: async (_, args, context) => {
         try {
             hasRole_GQL(context, 'admin', 'standard');
-            const ranking = await getTaskUserRanking();
+            const ranking = await getTaskUserRanking(context.redisClient);
             console.log(ranking);
             return ranking;
         } catch (error) {

@@ -12,20 +12,53 @@ const difficultyMap = {
 
 const notifyUpdate = (io) => {
     console.log(io)
-    if(io) {
-        io.emit('server:tasks-update', {msg: 'Lista actualizado'});
+    if (io) {
+        io.emit('server:tasks-update', { msg: 'Lista actualizado' });
         console.log('Evento socket emitido: server:task-update')
     }
 }
 
-export const tasksGet = async ({ filter }) => {
+const clearCache = async (redisClient) => {
+    if (!redisClient) {
+        console.log("Problema limpiando la cache")
+        return;
+    }
     try {
+        const keys = await redisClient.keys('tasks:*');
+        if (keys.length > 0) {
+            await redisClient.del(keys);
+            console.log("He limpiado la caché en redis");
+        }
+    } catch (error) {
+        console.error('Error limpiando la cache en redis: ' + error);
+    }
+}
+
+
+
+export const tasksGet = async ({ filter }, redisClient) => {
+    try {
+        const cacheKey = filter ? `tasks:${JSON.stringify(filter)}` : 'tasks:all';
+        //honestamente esto me ha quedado raro debido al tema del filtro
+        //creo que se puede mejorar
+        if (redisClient) {
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado las tareas desde redis');
+                return JSON.parse(cacheData);
+            }
+        }
+
 
         if (!filter) {
             const tasks = await Task.find();
             if (tasks.length > 0) {
                 console.log(tasks)
                 console.log('Listado correcto!');
+                if (redisClient) {
+                    await redisClient.setEx(cacheKey, 60, JSON.stringify(tasks));
+                    console.log("He guardado en cache las tareas durante 60 s")
+                }
                 return (tasks);
             }
             else {
@@ -92,6 +125,12 @@ export const tasksGet = async ({ filter }) => {
             });
         }
         const result = await Task.aggregate(pipeline);
+
+        if (redisClient && result.length > 0) {
+            await redisClient.setEx(cacheKey, 60, JSON.stringify(result));
+            console.log("He guardado en cache las tareas durante 60 s")
+        }
+
         console.log("Tareas cargadas correctamente")
         return result;
 
@@ -103,8 +142,18 @@ export const tasksGet = async ({ filter }) => {
 }
 
 //tareas asignadas con lookup
-export const tasksGetAssignated = async () => {
+export const tasksGetAssignated = async (redisClient) => {
     try {
+        const cacheKey = 'tasks:assignated'
+
+        if (redisClient) {
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado las tareas desde redis');
+                return JSON.parse(cacheData);
+            }
+        }//podría sacarlo en un metodo ya que lo repito todo el rato
+
         const tasks = await Task.aggregate([
             {
                 $lookup: {
@@ -121,6 +170,10 @@ export const tasksGetAssignated = async () => {
         if (tasks.length > 0) {
             console.log(tasks)
             console.log('Listado correcto!');
+            if(redisClient){
+                await redisClient.setEx(cacheKey, 60, JSON.stringify(tasks));
+                console.log("He guardado en cache las tareas asignadas durante 60 s")
+            }
             return (tasks);
         }
         else {
@@ -133,11 +186,26 @@ export const tasksGetAssignated = async () => {
     }
 }
 
-export const taskGet = async (id) => {
+export const taskGet = async (id, redisClient) => {
     try {
+        const cacheKey = `tasks:${id}`;
+        if (redisClient) {
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado la tarea desde redis');
+                return JSON.parse(cacheData);
+            }
+        }
+
+
+
         const task = await Task.findOne({ id: id });
         if (task != null) {
             console.log('Tarea encontrada!');
+            if (redisClient) {
+                await redisClient.setEx(cacheKey, 60, JSON.stringify(task));
+                console.log("He guardado en cache la tarea durante 60 s")
+            }
             return task
         } else {
             throw new Error("Tarea no encontrada!");
@@ -151,7 +219,7 @@ export const taskGet = async (id) => {
 
 //mutations
 
-export const createTask = async ({ input }, io) => {
+export const createTask = async ({ input }, io, redisClient) => {
     try {
         const newTask = new Task({
             id: await Task.countDocuments() + 1,
@@ -160,7 +228,8 @@ export const createTask = async ({ input }, io) => {
             difficulty: input.difficulty,
         });//por defecto es por hacer y no es asignado a nadie al crearse
         const saved = await newTask.save()
-        notifyUpdate(io)
+        notifyUpdate(io);
+        await clearCache(redisClient);
         return saved
     }
     catch (error) {
@@ -169,7 +238,7 @@ export const createTask = async ({ input }, io) => {
     }
 
 }
-export const updateTask = async ({ id, input }) => {
+export const updateTask = async ({ id, input }, redisClient) => {
     try {
         const updatedTask = await Task.findOneAndUpdate(
             { id: id },
@@ -200,6 +269,7 @@ export const updateTask = async ({ id, input }) => {
 
             ]);
             console.log("Tarea actualizada y populada correctamente!")
+            await clearCache(redisClient);
             return result[0];
         } else {
             throw new Error('Tarea no encontrada!', error);
@@ -211,7 +281,7 @@ export const updateTask = async ({ id, input }) => {
     }
 }
 
-export const changeTaskStatus = async ({ id, status }, idU, roles) => {
+export const changeTaskStatus = async ({ id, status }, idU, roles, redisClient) => {
     try {
         const requiredTask = await Task.findOne(
             { id: id }
@@ -228,7 +298,7 @@ export const changeTaskStatus = async ({ id, status }, idU, roles) => {
         if (roles.some(rol => rol.name === 'standard') && !roles.some(rol => rol.name === 'admin')) {
             const validTransitions = {
                 'por hacer': 'haciendo',
-                'haciendo': 'hecho'
+                'haciendo': 'hecha'
             };
             const currentStatus = requiredTask.status;
             const newStatus = status;
@@ -245,6 +315,7 @@ export const changeTaskStatus = async ({ id, status }, idU, roles) => {
 
         if (updatedTask) {
             console.log('Estado de la tarea actualizado correctamente!');
+            await clearCache(redisClient);
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');
@@ -255,12 +326,13 @@ export const changeTaskStatus = async ({ id, status }, idU, roles) => {
     }
 }
 
-export const deleteTask = async ({ id }, io) => {
+export const deleteTask = async ({ id }, io, redisClient) => {
     try {
         const deletedTask = await Task.deleteOne({ id: id });
         if (deletedTask.deletedCount > 0) {
             console.log('¡Tarea eliminada correctamente!');
             notifyUpdate(io)
+            await clearCache(redisClient);
             return { id: id }; // Devolver un objeto con el ID de la tarea eliminada
         } else {
             throw new Error('Tarea no encontrada!');
@@ -273,7 +345,7 @@ export const deleteTask = async ({ id }, io) => {
 
 
 //Asignar Tarea a alguien como admin
-export const asignateTask = async ({ id, idU }, io) => {
+export const asignateTask = async ({ id, idU }, io, redisClient) => {
     try {
         //comprobar si el usuario que se intentaAsignar existe
         const user = await User.findOne({ id: idU });
@@ -288,6 +360,7 @@ export const asignateTask = async ({ id, idU }, io) => {
         if (updatedTask) {
             console.log('Tarea asignada correctamente!');
             notifyUpdate(io);
+            await clearCache(redisClient);
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');
@@ -298,12 +371,25 @@ export const asignateTask = async ({ id, idU }, io) => {
     }
 }
 
-export const getUserTasks = async (idU) => {
+export const getUserTasks = async (idU, redisClient) => {
     try {
+        const cacheKey = `tasks:user:${idU}`;
+        if(redisClient){
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado las tareas del usuario desde redis');
+                return JSON.parse(cacheData);
+            }
+        }
+
         const tasks = await Task.find({ idU: idU });
         if (tasks.length > 0) {
             console.log(tasks);
             console.log('Listado correcto!');
+            if(redisClient){
+                await redisClient.setEx(cacheKey, 60, JSON.stringify(tasks));
+                console.log("He guardado en cache las tareas del usuario durante 60 s")
+            }
             return (tasks);
         } else {
             throw new Error("No hay registros.");
@@ -340,7 +426,7 @@ export const releaseTask = async ({ id }, idU, io) => {
     }
 }
 
-export const takeTask = async ({ id }, idU , io) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
+export const takeTask = async ({ id }, idU, io, redisClient) => { //como usuario normal solo puedo asignar la tarea si no la tiene nadie asignada
     try {
         //comprobar que la tarea tiene el idU a null
         const task = await Task.findOne({ id: id });
@@ -356,6 +442,7 @@ export const takeTask = async ({ id }, idU , io) => { //como usuario normal solo
         if (updatedTask) {
             console.log('Tarea asignada correctamente! Llamando a al web-socket');
             notifyUpdate(io)
+            await clearCache(redisClient);
             return updatedTask;
         } else {
             throw new Error('Tarea no encontrada!');
@@ -366,8 +453,19 @@ export const takeTask = async ({ id }, idU , io) => { //como usuario normal solo
     }
 }
 
-export const getTaskCount = async ({ filter }) => {
+export const getTaskCount = async ({ filter }, redisClient) => { //TODO guardar en cache
     try {
+        const cacheKey = `tasks:count:${JSON.stringify(filter)}`;
+        if (redisClient) {
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado el conteo de tareas desde redis');
+                return JSON.parse(cacheData);
+            }
+        }
+
+
+
         let query = {};
         if (filter && filter.difficulty) {
             query.difficulty = filter.difficulty;//con esto si paso XL desde el front no tengo que hacer conversiones
@@ -375,6 +473,10 @@ export const getTaskCount = async ({ filter }) => {
 
         const count = await Task.countDocuments(query);
         console.log(`Conteo de tareas desde el back (${filter?.difficulty || 'Todas'}): ${count}`);
+        if(redisClient){
+            await redisClient.setEx(cacheKey, 60, JSON.stringify(count));
+            console.log("He guardado en cache el conteo de tareas durante 60 s")
+        }
         return count;
     }
     catch (error) {
@@ -385,8 +487,18 @@ export const getTaskCount = async ({ filter }) => {
 
 //(La consulta personalizada): Ranking de usuarios con más tareas "hechas"
 
-export const getTaskUserRanking = async () => {
+export const getTaskUserRanking = async (redisClient) => { //TODO guardar en cache
     try {
+        const cacheKey = 'tasks:ranking';
+        if (redisClient) {
+            const cacheData = await redisClient.get(cacheKey);
+            if (cacheData) {
+                console.log('He cargado el ranking de usuarios desde redis');
+                return JSON.parse(cacheData);
+            }
+        }
+
+
         const ranking = await Task.aggregate([
             {
                 $match: { status: 'hecha' }
@@ -420,6 +532,10 @@ export const getTaskUserRanking = async () => {
             }
         ]);
         console.log('Ranking de usuarios obtenido correctamente: ' + ranking);
+        if(redisClient){
+            await redisClient.setEx(cacheKey, 60, JSON.stringify(ranking));
+            console.log("He guardado en cache el ranking de usuarios durante 60 s")
+        }
         return ranking;
 
     } catch (error) {
@@ -428,116 +544,3 @@ export const getTaskUserRanking = async () => {
     }
 }
 
-//Ejemplo:
-
-/*
-
-export const usuariosGet = async () => {
-    try {
-        const personas = await UserModel.find();
-        if (personas.length > 0) {
-            console.log(personas)
-            console.log('Listado correcto!');
-            return (personas);
-        } else {
-            throw new Error("No hay registros.");
-            //console.log('No hay registros!');
-            //return null;
-        }
-    } catch (error) {
-        throw new Error('Error al obtener usuarios:', error);
-        // console.error('Error al obtener usuarios:', error);
-        // return null
-    }
-};
-
-
-export const usuarioGet = async (pid) => {
-
-    try {
-        const usuario = await UserModel.findOne({"id": pid});
-        console.log(usuario);
-        if (usuario != null)  {
-            console.log('Usuario encontrado!');
-            return usuario
-        } else {
-            throw new Error("Usuario no encontrado!");
-            // console.log('Usuario no encontrado!');
-            // return null
-        }
-    } catch (error) {
-        throw new Error('Error al obtener usuario por ID:', error);
-        // console.error('Error al obtener usuario por ID:', error);
-        // return null
-    }
-}
-
-export const usuariosPost = async (pers) => {
-
-    try {
-        const encontrado = await UserModel.findOne({ "id": pers.id });
-        if (encontrado) {
-            throw new Error("Usuario ya existe!");
-        }
-        
-        const usuario = await UserModel.create(pers);
-        console.log('Usuario registrado correctamente!', usuario);
-        return usuario;
-    
-    } catch (error) {
-        if (error.message === "Usuario ya existe!") {
-            throw new Error("El usuario ya está registrado en la base de datos.");
-        } else if (error.name === "ValidationError") {
-            throw new Error("Datos inválidos para registrar usuario.");
-        } else {
-            throw new Error("Error inesperado al registrar usuario.");
-        }
-    }
-    
-}
-
-export const usuariosPut = async (id, pers) => {
-
-    try {
-        const usuarioActualizado = await UserModel.updateOne({id : id}, pers, { new: true }); //Con la opción new, se devuelve el objeto acualizado, en caos contrario el original.
-        //const usuarioActualizado = await UserModel.updateMany({id : id}, pers);
-        console.log(usuarioActualizado.matchedCount)
-        console.log(pers)
-        if (usuarioActualizado.matchedCount > 0) {
-            console.log('Usuario actualizado correctamente!');
-            return pers
-        } else {
-            throw new Error('Usuario no encontrado!', error);
-            // console.log('Usuario no encontrado!');
-            // return 0;
-        }
-    } catch (error) {
-        throw new Error('Error al actualizar usuario!', error);
-        // console.error('Error al actualizar usuario:', error);
-        // return -1
-    }
-};
-
-
-export const usuariosDelete = async (pid) => {
-
-    try {
-        //const usuarioEliminado = await UserModel.deleteOne({"id": pid});
-        const usuarioEliminado = await UserModel.deleteMany({"id": pid});
-        if (usuarioEliminado.deletedCount > 0) {
-            console.log('Usuario eliminado correctamente!');
-            return true;
-        } else {
-            throw new Error('Usuario no encontrado!', error);
-            // console.log('Usuario no encontrado!');
-            // return false
-        }
-    } catch (error) {
-        throw new Error('Error al eliminar usuario!', error);
-        // console.error('Error al eliminar usuario:', error);
-        // return false
-    }
-};
-
-
-*/
