@@ -26,9 +26,9 @@ export const googleVerify = async (idToken='')=>{
             throw new Error("El payload no fue proporcionado");
         }
         
-        const {name, picture:img, email} = payload;
+        const {name:userName, picture:img, email} = payload;
 
-        return {name, img, email};
+        return {userName, img, email};
     }catch(error){
         console.log('Error en la verificación del token de Google:',error);
         throw new Error(`El token no se pudo verificar: ${error.message}}`);

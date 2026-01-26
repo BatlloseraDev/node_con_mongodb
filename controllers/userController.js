@@ -138,7 +138,13 @@ const controlador = {
         }
     },
     loginGoogle: async (req, res = response) => {
-        const { idToken } = req.body;
+        console.log(req.body);
+
+        const  idToken  = req.body.id_token;
+        if (!idToken) {
+            return res.status(400).json({ msg: 'No se recibió el idToken' });
+        }
+
         try {
             const { userName, img, email } = await googleVerify(idToken);
         
@@ -149,7 +155,8 @@ const controlador = {
                 const token = generateJWT_with_roles(user.id, user.role);
                 res.status(200).json({ user, token });
             } else {
-                const newUser = new User({ id, userName, email, password: ':P', img });
+                const id_n = await User.countDocuments() + 1;
+                const newUser = new User({ id: id_n, userName, email, password: ':P' });
                 await newUser.save();
                 console.log(kleur.green().bold('🟢 Usuario registrado correctamente con Google'));
                 console.log(kleur.blue().bold('🔵 GENERANDO JWT'));
@@ -166,7 +173,7 @@ const controlador = {
         try {
             const n = req.params.n;
             const users = [];
-            let id_n = await User.countDocuments() + 1;
+            let id_n = await User.countDocuments() + 1;// un poco arcaico
             let temp_password = "" 
             for (let i = 0; i < n; i++) {
                 temp_password = faker.internet.password();
