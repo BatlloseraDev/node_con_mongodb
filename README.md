@@ -116,6 +116,10 @@ o para una ejecución única:
 npm run test:run
 
 ```
+## Postman
+
+Puedes importar las consultas genericas en postman que se encuentran en `./resources`
+
 
 ## Licencia
 
