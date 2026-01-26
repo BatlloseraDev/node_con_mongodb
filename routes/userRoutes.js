@@ -9,6 +9,7 @@ import { hasRole } from "../middlewares/validateRoles.js";
 
 //router.get('/',[/*middlewares */],/*controlador.getUsers*/);
 router.post('/login', controlador.login);
+router.post('/login/google', controlador.loginGoogle);
 router.post('/register', controlador.register); //-> create
 
 

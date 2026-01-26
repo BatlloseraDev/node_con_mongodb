@@ -5,6 +5,7 @@ import kleur from "kleur";
 import bcrypt from 'bcrypt';
 import { generateJWT_with_roles } from "../helpers/generate_jwt.js";
 import { faker } from "@faker-js/faker";
+import { googleVerify } from "../helpers/google-verify.js";
 
 
 
@@ -135,6 +136,31 @@ const controlador = {
             console.error('❌ Error al logear el usuario:', error);
             res.status(500).json({ 'msg': 'Error al logear el usuario' });
         }
+    },
+    loginGoogle: async (req, res = response) => {
+        const { idToken } = req.body;
+        try {
+            const { userName, img, email } = await googleVerify(idToken);
+        
+            const user = await User.findOne({ email });
+            if (user) {
+                console.log(kleur.green().bold('🟢 Usuario logueado correctamente con Google'));
+                console.log(kleur.blue().bold('🔵 GENERANDO JWT'));
+                const token = generateJWT_with_roles(user.id, user.role);
+                res.status(200).json({ user, token });
+            } else {
+                const newUser = new User({ id, userName, email, password: ':P', img });
+                await newUser.save();
+                console.log(kleur.green().bold('🟢 Usuario registrado correctamente con Google'));
+                console.log(kleur.blue().bold('🔵 GENERANDO JWT'));
+                const token = generateJWT_with_roles(newUser.id, newUser.role);
+                res.status(200).json({ newUser, token });
+            }
+        }catch(error){
+            console.error('❌ Error al logear el usuario con Google:', error);
+            res.status(500).json({ 'msg': 'Error al logear el usuario con Google' });
+        }
+    
     },
     populateUsers: async (req, res) => {
         try {
