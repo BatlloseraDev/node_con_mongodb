@@ -1,0 +1,379 @@
+{
+  "info": {
+    "_postman_id": "1dba8ac1-83ec-4c49-9065-331a127da194",
+    "name": "node_mongodb_ejercicio4",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48599462"
+  },
+  "item": [
+    {
+      "name": "getUsers",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9XSwiaWF0IjoxNzY4MzI2MzY2LCJleHAiOjE3NjgzOTgzNjZ9.gjwM-lqafodXAo4uG_r8-4lTFuG3M4RObFJ_v8dgPmI",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getUser",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3NjgzMjkyMTYsImV4cCI6MTc2ODQwMTIxNn0.tOEaYKiUm4-XeQavLi61X2EGG5yWIuAgFynygIYdRLI",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/2",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\": \"2\",\r\n    \"userName\": \"frodoBolson\",\r\n    \"email\": \"frodo.bolson@example.com\",\r\n    \"password\": \"elAnillo\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/register",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\": \"1\",\r\n    \"userName\": \"john_doe\",\r\n    \"email\": \"john.doe@example.com\",\r\n    \"password\": \"password123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/login",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "deleteUser",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\": \"1\",\r\n    \"userName\": \"john_doe\",\r\n    \"email\": \"john.doe@example.com\",\r\n    \"password\": \"password123\"\r\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/1",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Populate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3Njg0MTYzOTUsImV4cCI6MTc2ODQ4ODM5NX0.5SLoXIJG1IkKE0-SYNaf0TsZ4TNdeCu5NznKlNtLpZ8",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/api/usuarios/populate/2",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "usuarios",
+            "populate",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetTaskGQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3Njg0MTYzOTUsImV4cCI6MTc2ODQ4ODM5NX0.5SLoXIJG1IkKE0-SYNaf0TsZ4TNdeCu5NznKlNtLpZ8",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query GetTask($getTaskId: ID!) {\r\n  getTask(id: $getTaskId) {\r\n    id\r\n    idU\r\n    status\r\n    duration\r\n    difficulty\r\n    description\r\n    updatedAt\r\n    createdAt\r\n  }\r\n}",
+            "variables": "{\r\n  \"getTaskId\": 1\r\n}"
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/graphql",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "graphql"
+          ],
+          "query": [
+            {
+              "key": "x",
+              "value": null,
+              "type": "text",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetTasksGQL_Asignated",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3Njg0MTYzOTUsImV4cCI6MTc2ODQ4ODM5NX0.5SLoXIJG1IkKE0-SYNaf0TsZ4TNdeCu5NznKlNtLpZ8",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query  {\r\n  getTasksAssignated {\r\n    id\r\n    idU\r\n    status\r\n    updatedAt\r\n    duration\r\n    difficulty\r\n    description\r\n    createdAt\r\n  }\r\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/graphql",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "graphql"
+          ],
+          "query": [
+            {
+              "key": "x",
+              "value": null,
+              "type": "text",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetTasksGQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3Njg0MTYzOTUsImV4cCI6MTc2ODQ4ODM5NX0.5SLoXIJG1IkKE0-SYNaf0TsZ4TNdeCu5NznKlNtLpZ8",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query  {\r\n  getTasksAssignated {\r\n    id\r\n    idU\r\n    status\r\n    updatedAt\r\n    duration\r\n    difficulty\r\n    description\r\n    createdAt\r\n  }\r\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/graphql",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "graphql"
+          ],
+          "query": [
+            {
+              "key": "x",
+              "value": null,
+              "type": "text",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "CreateTaskGQL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZXMiOlt7Im5hbWUiOiJzdGFuZGFyZCJ9LHsibmFtZSI6ImFkbWluIn1dLCJpYXQiOjE3Njg0MTE3NDMsImV4cCI6MTc2ODQ4Mzc0M30.ZE2tX6w6aQ3AYrjJZ7xBrsKBQ8sSIjI3w2JzvevVRBs",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation CreateTask($input: TaskCreateInput!) {\r\n  createTask(input: $input) {\r\n    id\r\n    idU\r\n    description\r\n    duration\r\n    difficulty\r\n    status        \r\n    createdAt\r\n  }\r\n}",
+            "variables": "{\r\n  \"input\": {\r\n    \"description\": \"primera tarea\",\r\n    \"difficulty\": \"M\",\r\n    \"duration\": 2,\r\n    \"id\": 1\r\n  }\r\n}"
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:9090/graphql",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "9090",
+          "path": [
+            "graphql"
+          ],
+          "query": [
+            {
+              "key": "x",
+              "value": null,
+              "type": "text",
+              "disabled": true
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
